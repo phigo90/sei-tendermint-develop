@@ -539,7 +539,6 @@ func (r *Router) openConnection(ctx context.Context, conn Connection) {
 		return
 	}
 
-	r.logger.Info("Hallo Eric")
 	// FIXME: The peer manager may reject the peer during Accepted()
 	// after we've handshaked with the peer (to find out which peer it
 	// is). However, because the handshake has no ack, the remote peer
@@ -649,7 +648,7 @@ func (r *Router) connectPeer(ctx context.Context, address NodeAddress) {
 		}
 		return
 	}
-
+	r.logger.Error("For Handshake")
 	peerInfo, err := r.handshakePeer(ctx, conn, address.NodeID)
 	switch {
 	case errors.Is(err, context.Canceled):
