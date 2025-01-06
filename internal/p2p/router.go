@@ -648,7 +648,7 @@ func (r *Router) connectPeer(ctx context.Context, address NodeAddress) {
 		}
 		return
 	}
-	r.logger.Info("Guten Rutsch Jungs")
+	r.logger.Info("Eric du altes Haus!")
 	peerInfo, err := r.handshakePeer(ctx, conn, address.NodeID)
 	switch {
 	case errors.Is(err, context.Canceled):
