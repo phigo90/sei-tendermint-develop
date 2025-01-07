@@ -90,7 +90,6 @@ func (r *varintReader) ReadMsg(msg proto.Message) (int, error) {
 	if err != nil {
 		return n, err
 	}
-	fmt.Printf("Raw message (hex): %x\n", buf)
 
 	return n, proto.Unmarshal(buf, msg)
 }
