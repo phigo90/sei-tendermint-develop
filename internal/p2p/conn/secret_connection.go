@@ -266,10 +266,10 @@ func (sc *SecretConnection) Read(data []byte) (n int, err error) {
 		return 0, errors.New("chunkLength is greater than dataMaxSize")
 	}
 	var chunk = frame[dataLenSize : dataLenSize+chunkLength]
+	fmt.Printf("Rohe Daten: %v\n", chunk)
 	n = copy(data, chunk)
 	if n < len(chunk) {
 		sc.recvBuffer = make([]byte, len(chunk)-n)
-		fmt.Printf("Rohe Daten: %v\n", chunk[n:])
 		copy(sc.recvBuffer, chunk[n:])
 	}
 	return n, err
