@@ -212,7 +212,7 @@ func (sc *SecretConnection) Write(data []byte) (n int, err error) {
 			binary.LittleEndian.PutUint32(frame, uint32(chunkLength))
 			copy(frame[dataLenSize:], chunk)
 
-			fmt.Printf("Send", len(frame))
+			fmt.Printf("Send: %x", frame)
 
 			// encrypt the frame
 			sc.sendAead.Seal(sealedFrame[:0], sc.sendNonce[:], frame, nil)
