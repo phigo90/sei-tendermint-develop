@@ -502,6 +502,7 @@ FOR_LOOP:
 		var packet tmp2p.Packet
 
 		_n, err := protoReader.ReadMsg(&packet)
+		fmt.Printf("Rohe daten: %+v\n", packet)
 		c.recvMonitor.Update(_n)
 		if err != nil {
 			// stopServices was invoked and we are shutting down
@@ -532,12 +533,14 @@ FOR_LOOP:
 		case *tmp2p.Packet_PacketPing:
 			// TODO: prevent abuse, as they cause flush()'s.
 			// https://github.com/tendermint/tendermint/issues/1190
+			fmt.Printf("ping")
 			select {
 			case c.pong <- struct{}{}:
 			default:
 				// never block
 			}
 		case *tmp2p.Packet_PacketPong:
+			fmt.Printf("pong")
 			// do nothing, we updated the "last message
 			// received" timestamp above, so we can ignore
 			// this message
