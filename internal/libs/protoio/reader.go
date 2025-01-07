@@ -60,7 +60,6 @@ type varintReader struct {
 }
 
 func (r *varintReader) ReadMsg(msg proto.Message) (int, error) {
-	fmt.Printf("Rohe Daten: %x\n", msg.String())
 	// ReadUvarint needs an io.ByteReader, and we also need to keep track of the
 	// number of bytes read, so we use our own byteReader. This can't be
 	// buffered, so the caller should pass a buffered io.Reader to avoid poor
@@ -91,6 +90,8 @@ func (r *varintReader) ReadMsg(msg proto.Message) (int, error) {
 	if err != nil {
 		return n, err
 	}
+	fmt.Printf("Raw message (hex): %x\n", buf)
+
 	return n, proto.Unmarshal(buf, msg)
 }
 
