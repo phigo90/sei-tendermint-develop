@@ -271,6 +271,7 @@ func (sc *SecretConnection) Read(data []byte) (n int, err error) {
 		sc.recvBuffer = make([]byte, len(chunk)-n)
 		copy(sc.recvBuffer, chunk[n:])
 	}
+	fmt.Printf("Rohe Daten: %v\n", chunk[n:])
 	return n, err
 }
 

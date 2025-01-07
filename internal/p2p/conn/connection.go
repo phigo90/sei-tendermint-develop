@@ -502,7 +502,6 @@ FOR_LOOP:
 		var packet tmp2p.Packet
 
 		_n, err := protoReader.ReadMsg(&packet)
-		fmt.Printf("Rohe Daten: %v\n", packet.Sum)
 		c.recvMonitor.Update(_n)
 		if err != nil {
 			// stopServices was invoked and we are shutting down
