@@ -489,6 +489,8 @@ FOR_LOOP:
 		// Block until .recvMonitor says we can read.
 		c.recvMonitor.Limit(c._maxPacketMsgSize, c.config.RecvRate, true)
 
+		fmt.Printf("RcevRoutine2: %v\n", c.conn.RemoteAddr().String())
+
 		// Peek into bufConnReader for debugging
 		/*
 			if numBytes := c.bufConnReader.Buffered(); numBytes > 0 {
