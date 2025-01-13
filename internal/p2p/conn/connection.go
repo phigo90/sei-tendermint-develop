@@ -474,6 +474,7 @@ func (c *MConnection) recvRoutine(ctx context.Context) {
 
 FOR_LOOP:
 	for {
+		c.setRecvLastMsgAt(time.Now())
 		select {
 		case <-ctx.Done():
 			break FOR_LOOP
@@ -526,7 +527,7 @@ FOR_LOOP:
 		}
 
 		// record for pong/heartbeat
-		c.setRecvLastMsgAt(time.Now())
+		// c.setRecvLastMsgAt(time.Now())
 
 		// Read more depending on packet type.
 		switch pkt := packet.Sum.(type) {
