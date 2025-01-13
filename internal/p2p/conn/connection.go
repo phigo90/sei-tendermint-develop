@@ -46,7 +46,7 @@ const (
 	defaultRecvRate            = int64(512000) // 500KB/s
 	defaultSendTimeout         = 10 * time.Second
 	defaultPingInterval        = 60 * time.Second
-	defaultPongTimeout         = 90 * time.Second
+	defaultPongTimeout         = 120 * time.Second
 )
 
 type receiveCbFunc func(ctx context.Context, chID ChannelID, msgBytes []byte)
@@ -223,6 +223,7 @@ func (c *MConnection) setRecvLastMsgAt(t time.Time) {
 func (c *MConnection) getLastMessageAt() time.Time {
 	c.lastMsgRecv.Lock()
 	defer c.lastMsgRecv.Unlock()
+	fmt.Printf("Last msg at: %v\n", c.lastMsgRecv.at)
 	return c.lastMsgRecv.at
 }
 
