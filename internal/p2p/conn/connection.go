@@ -202,6 +202,7 @@ func NewMConnection(
 
 // OnStart implements BaseService
 func (c *MConnection) OnStart(ctx context.Context) error {
+	fmt.Printf("StartVorFlush: %v\n", c.conn.RemoteAddr().String())
 	c.flushTimer = timer.NewThrottleTimer("flush", c.config.FlushThrottle)
 	c.pingTimer = time.NewTicker(c.config.PingInterval)
 	c.chStatsTimer = time.NewTicker(updateStats)
@@ -211,6 +212,7 @@ func (c *MConnection) OnStart(ctx context.Context) error {
 	c.setRecvLastMsgAt(time.Now())
 	go c.sendRoutine(ctx)
 	go c.recvRoutine(ctx)
+	fmt.Printf("StartNachFlush: %v\n", c.conn.RemoteAddr().String())
 	return nil
 }
 
@@ -474,7 +476,6 @@ func (c *MConnection) recvRoutine(ctx context.Context) {
 
 FOR_LOOP:
 	for {
-		c.setRecvLastMsgAt(time.Now())
 		select {
 		case <-ctx.Done():
 			break FOR_LOOP
@@ -482,6 +483,8 @@ FOR_LOOP:
 			break FOR_LOOP
 		default:
 		}
+
+		fmt.Printf("RcevRoutine: %v\n", c.conn.RemoteAddr().String())
 
 		// Block until .recvMonitor says we can read.
 		c.recvMonitor.Limit(c._maxPacketMsgSize, c.config.RecvRate, true)
@@ -527,7 +530,7 @@ FOR_LOOP:
 		}
 
 		// record for pong/heartbeat
-		// c.setRecvLastMsgAt(time.Now())
+		c.setRecvLastMsgAt(time.Now())
 
 		// Read more depending on packet type.
 		switch pkt := packet.Sum.(type) {
