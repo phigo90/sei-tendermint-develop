@@ -268,6 +268,8 @@ func (sc *SecretConnection) Read(data []byte) (n int, err error) {
 	}
 	var chunk = frame[dataLenSize : dataLenSize+chunkLength]
 
+	fmt.Printf("Decrypted chunk: %v from %v\n", chunk, sc.RemoteAddr())
+
 	n = copy(data, chunk)
 	if n < len(chunk) {
 		sc.recvBuffer = make([]byte, len(chunk)-n)
