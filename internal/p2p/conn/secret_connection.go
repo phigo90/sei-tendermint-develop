@@ -274,6 +274,7 @@ func (sc *SecretConnection) Read(data []byte) (n int, err error) {
 	if n < len(chunk) {
 		sc.recvBuffer = make([]byte, len(chunk)-n)
 		copy(sc.recvBuffer, chunk[n:])
+		fmt.Printf("Write Chunk %v\n", sc.RemoteAddr())
 	}
 	return n, err
 }

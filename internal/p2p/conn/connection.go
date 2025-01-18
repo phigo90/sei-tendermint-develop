@@ -484,12 +484,12 @@ FOR_LOOP:
 		default:
 		}
 
-		fmt.Printf("RcevRoutine: %v\n", c.conn.RemoteAddr().String())
+		fmt.Printf("Start Routine: %v\n", c.conn.RemoteAddr().String())
 
 		// Block until .recvMonitor says we can read.
 		c.recvMonitor.Limit(c._maxPacketMsgSize, c.config.RecvRate, true)
 
-		fmt.Printf("RcevRoutine2: %v\n", c.conn.RemoteAddr().String())
+		fmt.Printf("Genug Daten Empfangen: %v\n", c.conn.RemoteAddr().String())
 
 		// Peek into bufConnReader for debugging
 		/*
@@ -509,6 +509,7 @@ FOR_LOOP:
 		var packet tmp2p.Packet
 
 		_n, err := protoReader.ReadMsg(&packet)
+		fmt.Printf("Genug Daten Empfangen: %v\n", c.conn.RemoteAddr().String())
 		c.recvMonitor.Update(_n)
 		if err != nil {
 			// stopServices was invoked and we are shutting down
@@ -519,6 +520,8 @@ FOR_LOOP:
 				break FOR_LOOP
 			default:
 			}
+
+			fmt.Printf("Error ist aufgetreten: %v\n", c.conn.RemoteAddr().String())
 
 			if c.IsRunning() {
 				if err == io.EOF {
@@ -533,6 +536,8 @@ FOR_LOOP:
 
 		// record for pong/heartbeat
 		c.setRecvLastMsgAt(time.Now())
+
+		fmt.Printf("MSG Receved: %v\n", c.conn.RemoteAddr().String())
 
 		// Read more depending on packet type.
 		switch pkt := packet.Sum.(type) {
@@ -551,6 +556,7 @@ FOR_LOOP:
 			// received" timestamp above, so we can ignore
 			// this message
 		case *tmp2p.Packet_PacketMsg:
+			fmt.Printf("Packet MSG: %v\n", c.conn.RemoteAddr().String())
 			channelID := ChannelID(pkt.PacketMsg.ChannelID)
 			channel, ok := c.channelsIdx[channelID]
 			if pkt.PacketMsg.ChannelID < 0 || pkt.PacketMsg.ChannelID > math.MaxUint8 || !ok || channel == nil {
@@ -559,7 +565,7 @@ FOR_LOOP:
 				c.stopForError(ctx, err)
 				break FOR_LOOP
 			}
-
+			fmt.Printf("Vor recvPacketMsg: %v\n", c.conn.RemoteAddr().String())
 			msgBytes, err := channel.recvPacketMsg(*pkt.PacketMsg)
 			if err != nil {
 				if c.IsRunning() {
@@ -568,18 +574,22 @@ FOR_LOOP:
 				}
 				break FOR_LOOP
 			}
+			fmt.Printf("Nach recvPacketMsg: %v\n", c.conn.RemoteAddr().String())
 			if msgBytes != nil {
 				c.logger.Debug("Received bytes", "chID", channelID, "msgBytes", msgBytes)
 				// NOTE: This means the reactor.Receive runs in the same thread as the p2p recv routine
 				c.onReceive(ctx, channelID, msgBytes)
 			}
 		default:
+			fmt.Printf("Nicht bekannte nachricht: %v\n", c.conn.RemoteAddr().String())
 			err := fmt.Errorf("unknown message type %v", reflect.TypeOf(packet))
 			c.logger.Error("Connection failed @ recvRoutine", "conn", c, "err", err)
 			c.stopForError(ctx, err)
 			break FOR_LOOP
 		}
 	}
+
+	fmt.Printf("fertig: %v\n", c.conn.RemoteAddr().String())
 
 	// Cleanup
 	close(c.pong)
