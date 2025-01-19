@@ -217,6 +217,7 @@ func (sc *SecretConnection) Write(data []byte) (n int, err error) {
 			// end encryption
 
 			_, err = sc.conn.Write(sealedFrame)
+			fmt.Printf("Encrypted Frame Bytes: %X\n", sealedFrame)
 			fmt.Printf("Send Data: %s %v\n", time.Now().Format("15:04:05.000"), sc.RemoteAddr())
 			if err != nil {
 				return err
