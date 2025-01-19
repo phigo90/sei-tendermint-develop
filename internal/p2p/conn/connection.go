@@ -405,6 +405,8 @@ FOR_LOOP:
 		if !c.IsRunning() {
 			break FOR_LOOP
 		}
+
+		fmt.Printf("Time: ")
 	}
 
 	// Cleanup
