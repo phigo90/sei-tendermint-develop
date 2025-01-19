@@ -202,7 +202,6 @@ func NewMConnection(
 
 // OnStart implements BaseService
 func (c *MConnection) OnStart(ctx context.Context) error {
-	fmt.Printf("StartVorFlush: %v\n", c.conn.RemoteAddr().String())
 	c.flushTimer = timer.NewThrottleTimer("flush", c.config.FlushThrottle)
 	c.pingTimer = time.NewTicker(c.config.PingInterval)
 	c.chStatsTimer = time.NewTicker(updateStats)
@@ -212,7 +211,6 @@ func (c *MConnection) OnStart(ctx context.Context) error {
 	c.setRecvLastMsgAt(time.Now())
 	go c.sendRoutine(ctx)
 	go c.recvRoutine(ctx)
-	fmt.Printf("StartNachFlush: %v\n", c.conn.RemoteAddr().String())
 	return nil
 }
 
@@ -225,7 +223,6 @@ func (c *MConnection) setRecvLastMsgAt(t time.Time) {
 func (c *MConnection) getLastMessageAt() time.Time {
 	c.lastMsgRecv.Lock()
 	defer c.lastMsgRecv.Unlock()
-	fmt.Printf("Last msg at: %v\n", c.lastMsgRecv.at)
 	return c.lastMsgRecv.at
 }
 
@@ -405,8 +402,6 @@ FOR_LOOP:
 		if !c.IsRunning() {
 			break FOR_LOOP
 		}
-
-		fmt.Printf("Timestamp: %s %v\n", time.Now().Format("15:04:05.000"), c.conn.RemoteAddr())
 	}
 
 	// Cleanup
@@ -486,12 +481,8 @@ FOR_LOOP:
 		default:
 		}
 
-		fmt.Printf("Start Routine: %v\n", c.conn.RemoteAddr().String())
-
 		// Block until .recvMonitor says we can read.
 		c.recvMonitor.Limit(c._maxPacketMsgSize, c.config.RecvRate, true)
-
-		fmt.Printf("Genug Daten Empfangen: %v\n", c.conn.RemoteAddr().String())
 
 		// Peek into bufConnReader for debugging
 		/*
@@ -511,7 +502,6 @@ FOR_LOOP:
 		var packet tmp2p.Packet
 
 		_n, err := protoReader.ReadMsg(&packet)
-		fmt.Printf("Genug Daten Empfangen: %v\n", c.conn.RemoteAddr().String())
 		c.recvMonitor.Update(_n)
 		if err != nil {
 			// stopServices was invoked and we are shutting down
@@ -522,8 +512,6 @@ FOR_LOOP:
 				break FOR_LOOP
 			default:
 			}
-
-			fmt.Printf("Error ist aufgetreten: %v\n", c.conn.RemoteAddr().String())
 
 			if c.IsRunning() {
 				if err == io.EOF {
@@ -539,26 +527,21 @@ FOR_LOOP:
 		// record for pong/heartbeat
 		c.setRecvLastMsgAt(time.Now())
 
-		fmt.Printf("MSG Receved: %v\n", c.conn.RemoteAddr().String())
-
 		// Read more depending on packet type.
 		switch pkt := packet.Sum.(type) {
 		case *tmp2p.Packet_PacketPing:
 			// TODO: prevent abuse, as they cause flush()'s.
 			// https://github.com/tendermint/tendermint/issues/1190
-			fmt.Printf("ping")
 			select {
 			case c.pong <- struct{}{}:
 			default:
 				// never block
 			}
 		case *tmp2p.Packet_PacketPong:
-			fmt.Printf("pong")
 			// do nothing, we updated the "last message
 			// received" timestamp above, so we can ignore
 			// this message
 		case *tmp2p.Packet_PacketMsg:
-			fmt.Printf("Packet MSG: %v\n", c.conn.RemoteAddr().String())
 			channelID := ChannelID(pkt.PacketMsg.ChannelID)
 			channel, ok := c.channelsIdx[channelID]
 			if pkt.PacketMsg.ChannelID < 0 || pkt.PacketMsg.ChannelID > math.MaxUint8 || !ok || channel == nil {
@@ -567,7 +550,6 @@ FOR_LOOP:
 				c.stopForError(ctx, err)
 				break FOR_LOOP
 			}
-			fmt.Printf("Vor recvPacketMsg: %v\n", c.conn.RemoteAddr().String())
 			msgBytes, err := channel.recvPacketMsg(*pkt.PacketMsg)
 			if err != nil {
 				if c.IsRunning() {
@@ -576,22 +558,18 @@ FOR_LOOP:
 				}
 				break FOR_LOOP
 			}
-			fmt.Printf("Nach recvPacketMsg: %v\n", c.conn.RemoteAddr().String())
 			if msgBytes != nil {
 				c.logger.Debug("Received bytes", "chID", channelID, "msgBytes", msgBytes)
 				// NOTE: This means the reactor.Receive runs in the same thread as the p2p recv routine
 				c.onReceive(ctx, channelID, msgBytes)
 			}
 		default:
-			fmt.Printf("Nicht bekannte nachricht: %v\n", c.conn.RemoteAddr().String())
 			err := fmt.Errorf("unknown message type %v", reflect.TypeOf(packet))
 			c.logger.Error("Connection failed @ recvRoutine", "conn", c, "err", err)
 			c.stopForError(ctx, err)
 			break FOR_LOOP
 		}
 	}
-
-	fmt.Printf("fertig: %v\n", c.conn.RemoteAddr().String())
 
 	// Cleanup
 	close(c.pong)

@@ -217,6 +217,7 @@ func (sc *SecretConnection) Write(data []byte) (n int, err error) {
 			// end encryption
 
 			_, err = sc.conn.Write(sealedFrame)
+			fmt.Printf("Send Data: %s %v\n", time.Now().Format("15:04:05.000"), sc.RemoteAddr())
 			if err != nil {
 				return err
 			}
@@ -268,13 +269,10 @@ func (sc *SecretConnection) Read(data []byte) (n int, err error) {
 	}
 	var chunk = frame[dataLenSize : dataLenSize+chunkLength]
 
-	fmt.Printf("Decrypted chunk: %x from %v\n", chunk, sc.RemoteAddr())
-
 	n = copy(data, chunk)
 	if n < len(chunk) {
 		sc.recvBuffer = make([]byte, len(chunk)-n)
 		copy(sc.recvBuffer, chunk[n:])
-		fmt.Printf("Write Chunk %v\n", sc.RemoteAddr())
 	}
 	return n, err
 }
