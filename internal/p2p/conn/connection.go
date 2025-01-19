@@ -406,7 +406,7 @@ FOR_LOOP:
 			break FOR_LOOP
 		}
 
-		fmt.Printf("Timestamp: %s\n %v\n", time.Now().Format("2006-01-02 15:04:05"), c.conn.RemoteAddr())
+		fmt.Printf("Timestamp: %s %v\n", time.Now().Format("15:04:05.000"), c.conn.RemoteAddr())
 	}
 
 	// Cleanup
