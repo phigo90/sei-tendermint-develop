@@ -269,7 +269,7 @@ func (sc *SecretConnection) Read(data []byte) (n int, err error) {
 	}
 	var chunk = frame[dataLenSize : dataLenSize+chunkLength]
 
-	fmt.Printf("Chunk: %X\n", chunk)
+	fmt.Printf("Chunk: %X from %v\n", chunk, sc.RemoteAddr())
 
 	n = copy(data, chunk)
 	if n < len(chunk) {
