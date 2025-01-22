@@ -217,7 +217,6 @@ func (sc *SecretConnection) Write(data []byte) (n int, err error) {
 			// end encryption
 
 			_, err = sc.conn.Write(sealedFrame)
-			fmt.Printf("Encrypted Frame Bytes: %X\n", sealedFrame)
 			fmt.Printf("Send Data: %s %v\n", time.Now().Format("15:04:05.000"), sc.RemoteAddr())
 			if err != nil {
 				return err
@@ -269,6 +268,8 @@ func (sc *SecretConnection) Read(data []byte) (n int, err error) {
 		return 0, errors.New("chunkLength is greater than dataMaxSize")
 	}
 	var chunk = frame[dataLenSize : dataLenSize+chunkLength]
+
+	fmt.Printf("Chunk: %X\n", chunk)
 
 	n = copy(data, chunk)
 	if n < len(chunk) {
