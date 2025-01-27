@@ -10,6 +10,7 @@ import (
 	"net"
 	"reflect"
 	"runtime/debug"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -502,6 +503,10 @@ FOR_LOOP:
 		// Read packet type
 		var packet tmp2p.Packet
 		fmt.Printf("Setze packet variable %v\n", c.conn.RemoteAddr())
+
+		if strings.Split(c.conn.RemoteAddr().String(), ":")[0] == "95.223.75.196" {
+			fmt.Printf("Unsere IP")
+		}
 
 		_n, err := protoReader.ReadMsg(&packet)
 		if err != nil {
