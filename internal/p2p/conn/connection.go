@@ -504,6 +504,9 @@ FOR_LOOP:
 		fmt.Printf("Setze packet variable %v\n", c.conn.RemoteAddr())
 
 		_n, err := protoReader.ReadMsg(&packet)
+		if err != nil {
+			fmt.Printf("Error type: %T, Error: %v, Remote addr: %v\n", err, err, c.conn.RemoteAddr())
+		}
 		fmt.Printf("Read MSG %v\n", c.conn.RemoteAddr())
 		c.recvMonitor.Update(_n)
 		fmt.Printf("Update RecvMonitor %v\n", c.conn.RemoteAddr())
