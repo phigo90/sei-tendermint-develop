@@ -487,24 +487,26 @@ FOR_LOOP:
 		fmt.Printf("Nach Limit %v\n", c.conn.RemoteAddr())
 
 		// Peek into bufConnReader for debugging
-		/*
-			if numBytes := c.bufConnReader.Buffered(); numBytes > 0 {
-				bz, err := c.bufConnReader.Peek(tmmath.MinInt(numBytes, 100))
-				if err == nil {
-					// return
-				} else {
-					c.logger.Debug("error peeking connection buffer", "err", err)
-					// return nil
-				}
-				c.logger.Info("Peek connection buffer", "numBytes", numBytes, "bz", bz)
+
+		if numBytes := c.bufConnReader.Buffered(); numBytes > 0 {
+			bz, err := c.bufConnReader.Peek(tmmath.MinInt(numBytes, 100))
+			if err == nil {
+				// return
+			} else {
+				c.logger.Debug("error peeking connection buffer", "err", err)
+				// return nil
 			}
-		*/
+			c.logger.Info("Peek connection buffer", "numBytes", numBytes, "bz", bz)
+		}
 
 		// Read packet type
 		var packet tmp2p.Packet
+		fmt.Printf("Setze packet variable %v\n", c.conn.RemoteAddr())
 
 		_n, err := protoReader.ReadMsg(&packet)
+		fmt.Printf("Read MSG %v\n", c.conn.RemoteAddr())
 		c.recvMonitor.Update(_n)
+		fmt.Printf("Update RecvMonitor %v\n", c.conn.RemoteAddr())
 		if err != nil {
 			// stopServices was invoked and we are shutting down
 			// receiving is excpected to fail since we will close the connection
@@ -528,6 +530,7 @@ FOR_LOOP:
 
 		// record for pong/heartbeat
 		c.setRecvLastMsgAt(time.Now())
+		fmt.Printf("Set Last MSG %v\n", c.conn.RemoteAddr())
 
 		// Read more depending on packet type.
 		switch pkt := packet.Sum.(type) {
@@ -544,6 +547,7 @@ FOR_LOOP:
 			// received" timestamp above, so we can ignore
 			// this message
 		case *tmp2p.Packet_PacketMsg:
+			fmt.Printf("Read Packet %v\n", c.conn.RemoteAddr())
 			channelID := ChannelID(pkt.PacketMsg.ChannelID)
 			channel, ok := c.channelsIdx[channelID]
 			if pkt.PacketMsg.ChannelID < 0 || pkt.PacketMsg.ChannelID > math.MaxUint8 || !ok || channel == nil {
@@ -553,6 +557,7 @@ FOR_LOOP:
 				break FOR_LOOP
 			}
 			msgBytes, err := channel.recvPacketMsg(*pkt.PacketMsg)
+			fmt.Printf("Decoded Packet %v\n", c.conn.RemoteAddr())
 			if err != nil {
 				if c.IsRunning() {
 					c.logger.Error("Connection failed @ recvRoutine recvPacketMsg", "conn", c, "err", err)
@@ -571,6 +576,7 @@ FOR_LOOP:
 			c.stopForError(ctx, err)
 			break FOR_LOOP
 		}
+		fmt.Printf("Finished Loop %v\n", c.conn.RemoteAddr())
 	}
 
 	// Cleanup
