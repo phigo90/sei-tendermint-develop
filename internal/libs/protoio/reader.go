@@ -34,6 +34,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"github.com/tendermint/tendermint/internal/p2p/conn"
 	"io"
 
 	"github.com/gogo/protobuf/proto"
@@ -64,12 +65,20 @@ func (r *varintReader) ReadMsg(msg proto.Message) (int, error) {
 	// number of bytes read, so we use our own byteReader. This can't be
 	// buffered, so the caller should pass a buffered io.Reader to avoid poor
 	// performance.
-	// Drucke die dekodierte Nachricht
-	fmt.Printf("Dekodierte Nachricht: %+v\n", msg)
+
+	// Print message content before reading
+	fmt.Printf("Message before reading: %+v\n", msg)
+	// If you want to see the hex representation of an already marshaled message:
+	if msgBytes, err := proto.Marshal(msg); err == nil {
+		fmt.Printf("Message hex before reading: %x\n", msgBytes)
+	}
 
 	byteReader := newByteReader(r.r)
 	l, err := binary.ReadUvarint(byteReader)
 	n := byteReader.bytesRead
+	if err != nil {
+		fmt.Printf("Reader Error type: %T, Error: %v\n", err, err)
+	}
 	if err != nil {
 		return n, err
 	}
