@@ -34,7 +34,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"github.com/tendermint/tendermint/internal/p2p/conn"
 	"io"
 
 	"github.com/gogo/protobuf/proto"
