@@ -64,12 +64,19 @@ func (r *varintReader) ReadMsg(msg proto.Message) (int, error) {
 	// number of bytes read, so we use our own byteReader. This can't be
 	// buffered, so the caller should pass a buffered io.Reader to avoid poor
 	// performance.
+	// Drucke die dekodierte Nachricht
+	fmt.Printf("Dekodierte Nachricht: %+v\n", msg)
+
 	byteReader := newByteReader(r.r)
 	l, err := binary.ReadUvarint(byteReader)
 	n := byteReader.bytesRead
 	if err != nil {
 		return n, err
 	}
+
+	// Drucke die Varint-Länge in Hex und Decimal
+	fmt.Printf("Varint Länge (hex): %X\n", byteReader.bytesRead)
+	fmt.Printf("Länge (decimal): %d\n", l)
 
 	// Make sure length doesn't overflow the native int size (e.g. 32-bit),
 	// and that the returned sum of n+length doesn't overflow either.
