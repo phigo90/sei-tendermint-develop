@@ -482,9 +482,9 @@ FOR_LOOP:
 		}
 
 		// Block until .recvMonitor says we can read.
-		fmt.Printf("Vor Limit\n")
+		fmt.Printf("Vor Limit %v\n", c.conn.RemoteAddr())
 		c.recvMonitor.Limit(c._maxPacketMsgSize, c.config.RecvRate, true)
-		fmt.Printf("Nach Limit\n")
+		fmt.Printf("Nach Limit %v\n", c.conn.RemoteAddr())
 
 		// Peek into bufConnReader for debugging
 		/*
